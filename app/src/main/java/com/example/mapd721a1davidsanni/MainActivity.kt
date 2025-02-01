@@ -62,16 +62,20 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun Main() {
     val context = LocalContext.current
-    val keyboardController = LocalSoftwareKeyboardController.current
     val store = UserStore(context)
     val coroutineScope = rememberCoroutineScope()
 
-    // State for text fields
+    // State for text fields (input)
     val idState = remember { mutableStateOf(TextFieldValue()) }
     val usernameState = remember { mutableStateOf(TextFieldValue()) }
     val courseState = remember { mutableStateOf(TextFieldValue()) }
 
-    // Collect stored data from UserStore
+    // State for displayed stored values
+    val storedIdState = remember { mutableStateOf("") }
+    val storedUsernameState = remember { mutableStateOf("") }
+    val storedCourseState = remember { mutableStateOf("") }
+
+    // Collect stored data
     val storedId = store.getAccessID.collectAsState(initial = "")
     val storedUsername = store.getAccessName.collectAsState(initial = "")
     val storedCourse = store.getAccessCourse.collectAsState(initial = "")
@@ -85,52 +89,44 @@ private fun Main() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(30.dp))
-//
-//        // ID TextField
+
+        // ID Input Field
         TextField(
             value = idState.value,
-            modifier = Modifier
-                .fillMaxWidth(),
             onValueChange = { idState.value = it },
-            label = { Text("ID") }
+            label = { Text("ID") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-//        // Username TextField
+        // Username Input Field
         TextField(
             value = usernameState.value,
-            modifier = Modifier
-                .fillMaxWidth(),
             onValueChange = { usernameState.value = it },
-            label = { Text("Username") }
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Course TextField
+        // Course Name Input Field
         TextField(
             value = courseState.value,
-            modifier = Modifier
-                .fillMaxWidth(),
             onValueChange = { courseState.value = it },
-            label = { Text("Course Name") }
+            label = { Text("Course Name") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(30.dp))
-        // Buttons for Store, Load, and Reset
-        Row ( modifier = Modifier
-            .fillMaxWidth()
-            .padding()
-            .padding(top = 30.dp),
-            horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+
+        // Buttons Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
             // Store Button
-            Button(  modifier = Modifier
-//                .width(120.dp)
-                .height(60.dp)
-                .weight(1F)
-                .padding(),
-                shape = MaterialTheme.shapes.medium,
+            Button(
                 onClick = {
                     coroutineScope.launch {
                         store.saveUserID(idState.value.text)
@@ -138,82 +134,78 @@ private fun Main() {
                         store.saveCourse(courseState.value.text)
                     }
                 },
-            ) { Text("Store") }
+                modifier = Modifier.weight(1f).height(60.dp),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Store")
+            }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Load Button
-            Button(  modifier = Modifier
-//                .width(120.dp)
-                .height(60.dp)
-                .weight(1F)
-                .padding(),
-                shape = MaterialTheme.shapes.medium,
+            // Load Button (Only Updates Displayed Text Fields)
+            Button(
                 onClick = {
-                    idState.value = TextFieldValue(storedId.value)
-                    usernameState.value = TextFieldValue(storedUsername.value)
-                    courseState.value = TextFieldValue(storedCourse.value)
+                    storedIdState.value = storedId.value
+                    storedUsernameState.value = storedUsername.value
+                    storedCourseState.value = storedCourse.value
                 },
-            ) { Text("Load") }
-
-
-
+                modifier = Modifier.weight(1f).height(60.dp),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Load")
+            }
         }
-        Spacer(modifier = Modifier.width(15.dp))
 
-        // Reset Button
+        Spacer(modifier = Modifier.height(15.dp))
+
+        // Reset Button (Clears Both Stored Data & Displayed Text)
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(),
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
             onClick = {
-                coroutineScope.launch {
-                    store.clearData() // Clears stored data
-                }
-                // Reset fields to default values
+                coroutineScope.launch { store.clearData() }
+                storedIdState.value = ""
+                storedUsernameState.value = ""
+                storedCourseState.value = ""
                 idState.value = TextFieldValue("")
                 usernameState.value = TextFieldValue("")
                 courseState.value = TextFieldValue("")
-            }
-        ) { Text("Reset") }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+        ) {
+            Text("Reset")
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Display Stored Data (Does NOT Change TextField Inputs)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .border(1.5.dp, Color.DarkGray, shape = RoundedCornerShape(12.dp))
-                .background(if (storedId.value.isNotEmpty()) Color.LightGray else Color.White, shape = RoundedCornerShape(12.dp))
+                .background(
+                    if (storedIdState.value.isNotEmpty()) Color.LightGray else Color.White,
+                    shape = RoundedCornerShape(12.dp)
+                )
                 .padding(16.dp)
         ) {
-
             Text(
-                text = "${storedId.value}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                fontSize = 20.sp
+                text = storedIdState.value,
+                fontSize = 20.sp,
+                modifier = Modifier.fillMaxWidth().padding(10.dp)
             )
-
             Text(
-                text = "${storedUsername.value}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                fontSize = 20.sp
+                text = storedUsernameState.value,
+                fontSize = 20.sp,
+                modifier = Modifier.fillMaxWidth().padding(10.dp)
             )
-
-//            Text(
-//                text = "${storedCourse.value}",
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(10.dp),
-//                fontSize = 20.sp
-//            )
+            Text(
+                text = storedCourseState.value,
+                fontSize = 20.sp,
+                modifier = Modifier.fillMaxWidth().padding(10.dp)
+            )
         }
+
         Spacer(modifier = Modifier.height(60.dp))
         Text(text = "David Sanni\n301359093", fontWeight = FontWeight.Bold)
     }
