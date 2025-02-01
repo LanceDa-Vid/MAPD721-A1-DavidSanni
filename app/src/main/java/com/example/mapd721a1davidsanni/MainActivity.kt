@@ -214,7 +214,7 @@ private fun Main() {
 //                fontSize = 20.sp
 //            )
         }
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(60.dp))
         Text(text = "David Sanni\n301359093", fontWeight = FontWeight.Bold)
     }
 }
