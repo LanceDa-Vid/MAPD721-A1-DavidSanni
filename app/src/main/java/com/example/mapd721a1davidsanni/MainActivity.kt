@@ -125,6 +125,19 @@ private fun Main() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(15.dp)
         ) {
+
+            Button(
+                onClick = {
+                    storedIdState.value = storedId.value
+                    storedUsernameState.value = storedUsername.value
+                    storedCourseState.value = storedCourse.value
+                },
+                modifier = Modifier.weight(1f).height(60.dp),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text("Load")
+            }
+
             // Store Button
             Button(
                 onClick = {
@@ -141,17 +154,7 @@ private fun Main() {
             }
 
             // Load Button (Only Updates Displayed Text Fields)
-            Button(
-                onClick = {
-                    storedIdState.value = storedId.value
-                    storedUsernameState.value = storedUsername.value
-                    storedCourseState.value = storedCourse.value
-                },
-                modifier = Modifier.weight(1f).height(60.dp),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text("Load")
-            }
+
         }
 
         Spacer(modifier = Modifier.height(15.dp))
